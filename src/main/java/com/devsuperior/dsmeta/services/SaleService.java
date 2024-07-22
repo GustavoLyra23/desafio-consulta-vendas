@@ -11,7 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Optional;
 
 
@@ -30,7 +32,12 @@ public class SaleService {
 
     @Transactional(readOnly = true)
     public Page<SaleDto> findByDateAndName(String minDate, String maxDate, String name, Pageable pageable) {
-        Page<SaleProjection> projections = repository.searchSaleDto(LocalDate.parse(minDate), LocalDate.parse(maxDate), name, pageable);
+
+        LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+        LocalDate startDate = minDate.isEmpty() ? today.minusYears(2L) : LocalDate.parse(minDate);
+        LocalDate endDate = maxDate.isEmpty() ? today : LocalDate.parse(maxDate);
+
+        Page<SaleProjection> projections = repository.searchSaleDto(startDate, endDate, name, pageable);
         return projections.map(SaleDto::new);
     }
 
