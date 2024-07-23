@@ -2,8 +2,10 @@ package com.devsuperior.dsmeta.services;
 
 import com.devsuperior.dsmeta.dto.SaleDto;
 import com.devsuperior.dsmeta.dto.SaleMinDTO;
+import com.devsuperior.dsmeta.dto.SaleSummaryDto;
 import com.devsuperior.dsmeta.entities.Sale;
 import com.devsuperior.dsmeta.projections.SaleProjection;
+import com.devsuperior.dsmeta.projections.SaleSummaryProjection;
 import com.devsuperior.dsmeta.repositories.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,6 +41,16 @@ public class SaleService {
 
         Page<SaleProjection> projections = repository.searchSaleDto(startDate, endDate, name, pageable);
         return projections.map(SaleDto::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<SaleSummaryDto> findSaleSummaries(String minDate, String maxDate, Pageable pageable) {
+        LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+        LocalDate startDate = minDate.isEmpty() ? today.minusYears(2L) : LocalDate.parse(minDate);
+        LocalDate endDate = maxDate.isEmpty() ? today : LocalDate.parse(maxDate);
+
+        Page<SaleSummaryProjection> projections = repository.searchSaleSummary(startDate, endDate, pageable);
+        return projections.map(SaleSummaryDto::new);
     }
 
 
